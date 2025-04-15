@@ -32,14 +32,14 @@ Frontend
 ## What assumptions did you make?
 
 - I made the assumption that the infrastructure supporting this web app would be able to scale under pressure and continue serving the app efficiently.
-- I made the assumption that if organizations want to "view all of their deals and how much they are worth.", then they might want to see the `total value` and `average value` of their deals as well.
+- I made the assumption that if organizations want to "view all of their deals and how much they are worth", then they might want to see the `total value` and `average value` of their deals as well.
 
 ## What would you have done if you had more time?
 
 Server
 
 - I would consider creating a cleaner architecture, where we would have service classes. For example `organizations.service.ts` which would house functions that would interact directly with the database as their only concern. These service classes when then be using directly in the route handlers to perform any datanse operations. This pattern is super helpful when codebases get large by reducing code duplication, increacing code resuability, and improving organization.
-- I would have liked to implement a better solution for sharing types across the frontend and server. There are ways to share the types from end-to-end which make for a much better developer experience by improving type safety.
+- I would have liked to implement a better solution for sharing types across the frontend and server. There are ways to share the types from end-to-end which make for a much better developer experience by improving type safety. For this project, I just copied the types from the backend to the frontend. (not good practice)
 
 Frontend
 
@@ -47,3 +47,6 @@ Frontend
 - I would like to have a better way of pulling types from the backend to the frontend, for increased type safety as I mentioned before.
 
 ## Is there any feedback/questions you have for us?
+
+- I thoroughly enjoyed this technical assessment. So thank you for setting it up!
+- Given I move forward in the interview process, what do the next steps look like?

@@ -1,27 +1,14 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import {
   fetchOrganizations,
   fetchDealsByOrganizationId,
   fetchAccounts,
 } from "../services/api";
 import type { Organization, Deal, Account } from "../services/api";
-import {
-  Select,
-  Table,
-  Card,
-  Statistic,
-  Spin,
-  Empty,
-  Alert,
-  Tag,
-  Button,
-} from "antd";
-import type { ColumnsType } from "antd/es/table";
-import {
-  DollarOutlined,
-  CalendarOutlined,
-  ClearOutlined,
-} from "@ant-design/icons";
+import { Select, Spin, Empty, Alert } from "antd";
+import DealsFilters from "../components/DealsFilters";
+import DealsStats from "../components/DealsStats";
+import DealsTable from "../components/DealsTable";
 
 const Deals = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -41,7 +28,6 @@ const Deals = () => {
         const orgs = await fetchOrganizations();
         setOrganizations(orgs);
 
-        // Auto-select first organization if available
         if (orgs.length > 0) {
           setSelectedOrgId(orgs[0].id);
         }
@@ -85,111 +71,29 @@ const Deals = () => {
     fetchDeals();
   }, [selectedOrgId, statusFilter, yearFilter]);
 
-  const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
-
-  const formatCurrency = (value: number) => {
+  const formatCurrency = useCallback((value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
       minimumFractionDigits: 0,
     }).format(value);
-  };
+  }, []);
 
-  const formatDate = (dateStr: string) => {
+  const formatDate = useCallback((dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
       month: "short",
       day: "numeric",
     });
-  };
+  }, []);
 
-  const getAccountName = (accountId: number) => {
-    const account = accounts.find((acc) => acc.id === accountId);
-    return account ? account.name : "Unknown Account";
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status.toLowerCase()) {
-      case "closed-won":
-        return "green";
-      case "closed-lost":
-        return "red";
-      case "negotiation":
-        return "blue";
-      case "proposal":
-        return "gold";
-      case "qualified":
-        return "cyan";
-      case "prospecting":
-        return "purple";
-      default:
-        return "default";
-    }
-  };
-
-  const statusOptions = [
-    { value: "closed-won", label: "Closed Won" },
-    { value: "closed-lost", label: "Closed Lost" },
-    { value: "negotiation", label: "Negotiation" },
-    { value: "proposal", label: "Proposal" },
-    { value: "qualified", label: "Qualified" },
-    { value: "prospecting", label: "Prospecting" },
-  ];
-
-  const clearFilters = () => {
-    setStatusFilter(null);
-    setYearFilter(null);
-  };
-
-  const columns: ColumnsType<Deal> = [
-    {
-      title: "Account",
-      dataIndex: "account_id",
-      key: "account_id",
-      render: (accountId) => getAccountName(accountId),
+  const getAccountName = useCallback(
+    (accountId: number) => {
+      const account = accounts.find((acc) => acc.id === accountId);
+      return account ? account.name : "Unknown Account";
     },
-    {
-      title: "Start Date",
-      dataIndex: "start_date",
-      key: "start_date",
-      render: (date) => formatDate(date),
-      sorter: (a, b) =>
-        new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
-    },
-    {
-      title: "End Date",
-      dataIndex: "end_date",
-      key: "end_date",
-      render: (date) => formatDate(date),
-      sorter: (a, b) =>
-        new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
-    },
-    {
-      title: "Value",
-      dataIndex: "value",
-      key: "value",
-      render: (value) => formatCurrency(value),
-      sorter: (a, b) => a.value - b.value,
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
-      ),
-    },
-  ];
-
-  // Generate year options for the past 5 years and 5 years into the future
-  const currentYear = new Date().getFullYear();
-  const yearOptions = Array.from(
-    { length: 11 },
-    (_, i) => currentYear - 5 + i
-  ).map((year) => ({
-    value: year,
-    label: year.toString(),
-  }));
+    [accounts]
+  );
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -232,75 +136,14 @@ const Deals = () => {
 
       {selectedOrgId && (
         <>
-          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <Card>
-              <Statistic
-                title="Total Deals"
-                value={deals.length}
-                prefix={<CalendarOutlined />}
-              />
-            </Card>
-            <Card>
-              <Statistic
-                title="Total Value"
-                value={totalValue}
-                precision={0}
-                formatter={(value) => formatCurrency(value as number)}
-                prefix={<DollarOutlined />}
-                valueStyle={{ color: "#3f8600" }}
-              />
-            </Card>
-            <Card>
-              <Statistic
-                title="Average Deal Value"
-                value={deals.length ? totalValue / deals.length : 0}
-                precision={0}
-                formatter={(value) => formatCurrency(value as number)}
-                prefix={<DollarOutlined />}
-              />
-            </Card>
-          </div>
+          <DealsStats deals={deals} formatCurrency={formatCurrency} />
 
-          <div className="bg-white rounded-lg shadow p-4 mb-6">
-            <div className="flex flex-col md:flex-row gap-4">
-              <div className="w-full md:w-1/3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Filter by Status
-                </label>
-                <Select
-                  placeholder="Select status"
-                  style={{ width: "100%" }}
-                  value={statusFilter || undefined}
-                  onChange={(value) => setStatusFilter(value)}
-                  options={statusOptions}
-                  allowClear
-                />
-              </div>
-              <div className="w-full md:w-1/3">
-                <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Filter by Year
-                </label>
-                <Select
-                  placeholder="Select year"
-                  style={{ width: "100%" }}
-                  value={yearFilter || undefined}
-                  onChange={(value) => setYearFilter(value)}
-                  options={yearOptions}
-                  allowClear
-                />
-              </div>
-              <div className="w-full md:w-1/3 flex items-end">
-                <Button
-                  icon={<ClearOutlined />}
-                  onClick={clearFilters}
-                  disabled={!statusFilter && !yearFilter}
-                  className="mt-auto"
-                >
-                  Clear Filters
-                </Button>
-              </div>
-            </div>
-          </div>
+          <DealsFilters
+            statusFilter={statusFilter}
+            yearFilter={yearFilter}
+            setStatusFilter={setStatusFilter}
+            setYearFilter={setYearFilter}
+          />
         </>
       )}
 
@@ -309,29 +152,13 @@ const Deals = () => {
           <Spin size="large" />
         </div>
       ) : selectedOrgId && deals.length > 0 ? (
-        <div className="bg-white rounded-lg shadow overflow-hidden">
-          <Table
-            columns={columns}
-            dataSource={deals.map((deal) => ({ ...deal, key: deal.id }))}
-            pagination={{ pageSize: 10 }}
-            bordered
-            className="deals-table"
-            onRow={() => ({
-              className: "hover:bg-gray-50",
-            })}
-            rowClassName="transition-colors"
-            components={{
-              header: {
-                cell: (props: React.HTMLAttributes<HTMLTableCellElement>) => (
-                  <th
-                    {...props}
-                    className="bg-blue-50 text-gray-800 font-semibold"
-                  />
-                ),
-              },
-            }}
-          />
-        </div>
+        <DealsTable
+          deals={deals}
+          formatCurrency={formatCurrency}
+          formatDate={formatDate}
+          getAccountName={getAccountName}
+          loading={loading}
+        />
       ) : selectedOrgId ? (
         <Empty
           description="No deals found for this organization"

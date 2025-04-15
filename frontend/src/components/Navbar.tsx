@@ -3,7 +3,6 @@ import { Link, useLocation } from "react-router-dom";
 const Navbar = () => {
   const location = useLocation();
 
-  // Helper function to determine if a link is active
   const isActive = (path: string) => {
     return location.pathname === path
       ? "font-bold border-b-2 border-blue-500"
@@ -29,12 +28,6 @@ const Navbar = () => {
             className={`hover:text-blue-300 transition ${isActive("/deals")}`}
           >
             Deals
-          </Link>
-          <Link
-            to="/contact"
-            className={`hover:text-blue-300 transition ${isActive("/contact")}`}
-          >
-            Contact
           </Link>
         </div>
       </div>

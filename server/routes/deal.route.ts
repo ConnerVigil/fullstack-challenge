@@ -1,13 +1,27 @@
 import express, { Request, Response, NextFunction } from "express";
-import { Deal, DealCreate } from "../models";
+import { Deal, DealCreate, DealRow } from "../models";
 
 const router = express.Router();
+
+// Utility function to map database row to Deal interface
+const mapDealRowToDeal = (deal: DealRow): Deal => ({
+  id: deal.id,
+  accountId: deal.account_id,
+  organizationId: deal.organization_id,
+  startDate: new Date(deal.start_date),
+  endDate: new Date(deal.end_date),
+  value: deal.value,
+  status: deal.status,
+  createdAt: new Date(deal.created_at),
+  updatedAt: new Date(deal.updated_at),
+});
 
 // Get all deals
 router.get("/", (req: Request, res: Response, next: NextFunction): void => {
   const db = req.app.locals.db;
   try {
-    const deals: Deal[] = db.prepare("SELECT * FROM deals").all();
+    const dealRows: DealRow[] = db.prepare("SELECT * FROM deals").all();
+    const deals: Deal[] = dealRows.map(mapDealRowToDeal);
     res.json(deals);
   } catch (error) {
     console.error("Error fetching deals:", error);
@@ -37,9 +51,11 @@ router.post("/", (req: Request, res: Response, next: NextFunction): void => {
         deal.status
       );
 
-    const newDeal: Deal = db
+    const newDealRow: DealRow = db
       .prepare("SELECT * FROM deals WHERE id = ?")
       .get(result.lastInsertRowid);
+
+    const newDeal: Deal = mapDealRowToDeal(newDealRow);
 
     res.status(201).json(newDeal);
   } catch (error) {
@@ -73,9 +89,10 @@ router.get(
         params.push(yearEnd, yearStart);
       }
 
-      const deals: Deal[] = db.prepare(query).all(...params);
+      const deals: DealRow[] = db.prepare(query).all(...params);
+      const mappedDeals: Deal[] = deals.map(mapDealRowToDeal);
 
-      res.json(deals);
+      res.json(mappedDeals);
     } catch (error) {
       console.error("Error fetching deals:", error);
       res.status(500).json({ error: "Failed to fetch deals" });

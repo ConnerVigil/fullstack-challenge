@@ -45,3 +45,15 @@ export interface DealCreate {
   value: number;
   status: string;
 }
+
+export interface DealRow {
+  id: number;
+  account_id: number;
+  organization_id: number;
+  start_date: string;
+  end_date: string;
+  value: number;
+  status: string;
+  created_at: string;
+  updated_at: string;
+}

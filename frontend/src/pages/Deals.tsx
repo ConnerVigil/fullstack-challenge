@@ -5,9 +5,23 @@ import {
   fetchAccounts,
 } from "../services/api";
 import type { Organization, Deal, Account } from "../services/api";
-import { Select, Table, Card, Statistic, Spin, Empty, Alert, Tag } from "antd";
+import {
+  Select,
+  Table,
+  Card,
+  Statistic,
+  Spin,
+  Empty,
+  Alert,
+  Tag,
+  Button,
+} from "antd";
 import type { ColumnsType } from "antd/es/table";
-import { DollarOutlined, CalendarOutlined } from "@ant-design/icons";
+import {
+  DollarOutlined,
+  CalendarOutlined,
+  ClearOutlined,
+} from "@ant-design/icons";
 
 const Deals = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -16,6 +30,8 @@ const Deals = () => {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [yearFilter, setYearFilter] = useState<number | null>(null);
 
   // Fetch all organizations on component mount
   useEffect(() => {
@@ -43,14 +59,20 @@ const Deals = () => {
     fetchData();
   }, []);
 
-  // Fetch deals when organization is selected
+  // Fetch deals when organization is selected or filters change
   useEffect(() => {
     const fetchDeals = async () => {
       if (!selectedOrgId) return;
 
       try {
         setLoading(true);
-        const dealsData = await fetchDealsByOrganizationId(selectedOrgId);
+        const dealsData = await fetchDealsByOrganizationId(
+          selectedOrgId,
+          statusFilter,
+          yearFilter
+        );
+        console.log(dealsData);
+
         setDeals(dealsData);
         setError(null);
       } catch (err) {
@@ -62,7 +84,7 @@ const Deals = () => {
     };
 
     fetchDeals();
-  }, [selectedOrgId]);
+  }, [selectedOrgId, statusFilter, yearFilter]);
 
   const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
 
@@ -106,6 +128,20 @@ const Deals = () => {
     }
   };
 
+  const statusOptions = [
+    { value: "closed-won", label: "Closed Won" },
+    { value: "closed-lost", label: "Closed Lost" },
+    { value: "negotiation", label: "Negotiation" },
+    { value: "proposal", label: "Proposal" },
+    { value: "qualified", label: "Qualified" },
+    { value: "prospecting", label: "Prospecting" },
+  ];
+
+  const clearFilters = () => {
+    setStatusFilter(null);
+    setYearFilter(null);
+  };
+
   const columns: ColumnsType<Deal> = [
     {
       title: "Account",
@@ -143,18 +179,18 @@ const Deals = () => {
       render: (status) => (
         <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
       ),
-      filters: [
-        { text: "Closed Won", value: "closed-won" },
-        { text: "Closed Lost", value: "closed-lost" },
-        { text: "Negotiation", value: "negotiation" },
-        { text: "Proposal", value: "proposal" },
-        { text: "Qualified", value: "qualified" },
-        { text: "Prospecting", value: "prospecting" },
-      ],
-      onFilter: (value, record) =>
-        record.status.toLowerCase() === value.toString().toLowerCase(),
     },
   ];
+
+  // Generate year options for the past 5 years and 5 years into the future
+  const currentYear = new Date().getFullYear();
+  const yearOptions = Array.from(
+    { length: 11 },
+    (_, i) => currentYear - 5 + i
+  ).map((year) => ({
+    value: year,
+    label: year.toString(),
+  }));
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -196,34 +232,77 @@ const Deals = () => {
       )}
 
       {selectedOrgId && (
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          <Card>
-            <Statistic
-              title="Total Deals"
-              value={deals.length}
-              prefix={<CalendarOutlined />}
-            />
-          </Card>
-          <Card>
-            <Statistic
-              title="Total Value"
-              value={totalValue}
-              precision={0}
-              formatter={(value) => formatCurrency(value as number)}
-              prefix={<DollarOutlined />}
-              valueStyle={{ color: "#3f8600" }}
-            />
-          </Card>
-          <Card>
-            <Statistic
-              title="Average Deal Value"
-              value={deals.length ? totalValue / deals.length : 0}
-              precision={0}
-              formatter={(value) => formatCurrency(value as number)}
-              prefix={<DollarOutlined />}
-            />
-          </Card>
-        </div>
+        <>
+          <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <Card>
+              <Statistic
+                title="Total Deals"
+                value={deals.length}
+                prefix={<CalendarOutlined />}
+              />
+            </Card>
+            <Card>
+              <Statistic
+                title="Total Value"
+                value={totalValue}
+                precision={0}
+                formatter={(value) => formatCurrency(value as number)}
+                prefix={<DollarOutlined />}
+                valueStyle={{ color: "#3f8600" }}
+              />
+            </Card>
+            <Card>
+              <Statistic
+                title="Average Deal Value"
+                value={deals.length ? totalValue / deals.length : 0}
+                precision={0}
+                formatter={(value) => formatCurrency(value as number)}
+                prefix={<DollarOutlined />}
+              />
+            </Card>
+          </div>
+
+          <div className="bg-white rounded-lg shadow p-4 mb-6">
+            <div className="flex flex-col md:flex-row gap-4">
+              <div className="w-full md:w-1/3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Status
+                </label>
+                <Select
+                  placeholder="Select status"
+                  style={{ width: "100%" }}
+                  value={statusFilter || undefined}
+                  onChange={(value) => setStatusFilter(value)}
+                  options={statusOptions}
+                  allowClear
+                />
+              </div>
+              <div className="w-full md:w-1/3">
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Filter by Year
+                </label>
+                <Select
+                  placeholder="Select year"
+                  style={{ width: "100%" }}
+                  value={yearFilter || undefined}
+                  onChange={(value) => setYearFilter(value)}
+                  options={yearOptions}
+                  allowClear
+                />
+              </div>
+              <div className="w-full md:w-1/3 flex items-end">
+                <Button
+                  icon={<ClearOutlined />}
+                  onClick={clearFilters}
+                  disabled={!statusFilter && !yearFilter}
+                  className="mt-auto"
+                >
+                  Clear Filters
+                </Button>
+              </div>
+            </div>
+          </div>
+        </>
       )}
 
       {loading ? (

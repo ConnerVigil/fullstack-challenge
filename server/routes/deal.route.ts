@@ -54,11 +54,26 @@ router.get(
   (req: Request, res: Response, next: NextFunction): void => {
     const db = req.app.locals.db;
     const { id } = req.params;
+    const { status, year } = req.query;
 
     try {
-      const deals: Deal[] = db
-        .prepare("SELECT * FROM deals WHERE organization_id = ?")
-        .all(id);
+      let query = "SELECT * FROM deals WHERE organization_id = ?";
+      const params: any[] = [id];
+
+      if (status) {
+        query += " AND status = ?";
+        params.push(status);
+      }
+
+      if (year) {
+        // Filter by deals that overlap with the specified year
+        const yearStart = `${year}-01-01`;
+        const yearEnd = `${year}-12-31`;
+        query += " AND start_date <= ? AND end_date >= ?";
+        params.push(yearEnd, yearStart);
+      }
+
+      const deals: Deal[] = db.prepare(query).all(...params);
 
       res.json(deals);
     } catch (error) {

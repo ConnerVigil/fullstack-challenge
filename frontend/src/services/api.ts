@@ -46,11 +46,27 @@ export const fetchOrganizationById = async (
 };
 
 export const fetchDealsByOrganizationId = async (
-  organizationId: number
+  organizationId: number,
+  status?: string | null,
+  year?: number | null
 ): Promise<Deal[]> => {
-  const response = await fetch(
-    `${BASE_URL}/deals/organization/${organizationId}`
-  );
+  let url = `${BASE_URL}/deals/organization/${organizationId}`;
+  const params = new URLSearchParams();
+
+  if (status) {
+    params.append("status", status);
+  }
+
+  if (year) {
+    params.append("year", year.toString());
+  }
+
+  const queryString = params.toString();
+  if (queryString) {
+    url += `?${queryString}`;
+  }
+
+  const response = await fetch(url);
   if (!response.ok) {
     throw new Error("Failed to fetch deals");
   }

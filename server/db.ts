@@ -65,6 +65,7 @@ function seedDatabase(db: Database.Database) {
     { name: "Stark Enterprises" },
     { name: "Wayne Industries" },
     { name: "Umbrella Corporation" },
+    { name: "Wayne Enterprises" },
   ];
 
   const insertOrg = db.prepare("INSERT INTO organizations (name) VALUES (?)");

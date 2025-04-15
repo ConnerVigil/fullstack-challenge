@@ -7,11 +7,7 @@ import {
 import type { Organization, Deal, Account } from "../services/api";
 import { Select, Table, Card, Statistic, Spin, Empty, Alert, Tag } from "antd";
 import type { ColumnsType } from "antd/es/table";
-import {
-  ArrowUpOutlined,
-  DollarOutlined,
-  CalendarOutlined,
-} from "@ant-design/icons";
+import { DollarOutlined, CalendarOutlined } from "@ant-design/icons";
 
 const Deals = () => {
   const [organizations, setOrganizations] = useState<Organization[]>([]);
@@ -68,10 +64,8 @@ const Deals = () => {
     fetchDeals();
   }, [selectedOrgId]);
 
-  // Calculate total value of deals
   const totalValue = deals.reduce((sum, deal) => sum + deal.value, 0);
 
-  // Format currency
   const formatCurrency = (value: number) => {
     return new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -80,7 +74,6 @@ const Deals = () => {
     }).format(value);
   };
 
-  // Format date
   const formatDate = (dateStr: string) => {
     return new Date(dateStr).toLocaleDateString("en-US", {
       year: "numeric",
@@ -89,48 +82,49 @@ const Deals = () => {
     });
   };
 
-  // Get account name by ID
   const getAccountName = (accountId: number) => {
     const account = accounts.find((acc) => acc.id === accountId);
     return account ? account.name : "Unknown Account";
   };
 
-  // Get status color
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
-      case "active":
+      case "closed-won":
         return "green";
-      case "pending":
-        return "gold";
-      case "closed":
-        return "volcano";
-      case "negotiating":
+      case "closed-lost":
+        return "red";
+      case "negotiation":
         return "blue";
+      case "proposal":
+        return "gold";
+      case "qualified":
+        return "cyan";
+      case "prospecting":
+        return "purple";
       default:
         return "default";
     }
   };
 
-  // Table columns
   const columns: ColumnsType<Deal> = [
     {
       title: "Account",
-      dataIndex: "accountId",
-      key: "accountId",
+      dataIndex: "account_id",
+      key: "account_id",
       render: (accountId) => getAccountName(accountId),
     },
     {
       title: "Start Date",
-      dataIndex: "startDate",
-      key: "startDate",
+      dataIndex: "start_date",
+      key: "start_date",
       render: (date) => formatDate(date),
       sorter: (a, b) =>
         new Date(a.startDate).getTime() - new Date(b.startDate).getTime(),
     },
     {
       title: "End Date",
-      dataIndex: "endDate",
-      key: "endDate",
+      dataIndex: "end_date",
+      key: "end_date",
       render: (date) => formatDate(date),
       sorter: (a, b) =>
         new Date(a.endDate).getTime() - new Date(b.endDate).getTime(),
@@ -150,10 +144,12 @@ const Deals = () => {
         <Tag color={getStatusColor(status)}>{status.toUpperCase()}</Tag>
       ),
       filters: [
-        { text: "Active", value: "active" },
-        { text: "Pending", value: "pending" },
-        { text: "Closed", value: "closed" },
-        { text: "Negotiating", value: "negotiating" },
+        { text: "Closed Won", value: "closed-won" },
+        { text: "Closed Lost", value: "closed-lost" },
+        { text: "Negotiation", value: "negotiation" },
+        { text: "Proposal", value: "proposal" },
+        { text: "Qualified", value: "qualified" },
+        { text: "Prospecting", value: "prospecting" },
       ],
       onFilter: (value, record) =>
         record.status.toLowerCase() === value.toString().toLowerCase(),
@@ -200,7 +196,7 @@ const Deals = () => {
       )}
 
       {selectedOrgId && (
-        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div className="mb-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           <Card>
             <Statistic
               title="Total Deals"
@@ -225,16 +221,6 @@ const Deals = () => {
               precision={0}
               formatter={(value) => formatCurrency(value as number)}
               prefix={<DollarOutlined />}
-            />
-          </Card>
-          <Card>
-            <Statistic
-              title="YoY Growth"
-              value={11.28}
-              precision={2}
-              valueStyle={{ color: "#3f8600" }}
-              prefix={<ArrowUpOutlined />}
-              suffix="%"
             />
           </Card>
         </div>

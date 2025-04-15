@@ -8,6 +8,8 @@ Steps to run the server:
 - `npm i`
 - `npm run dev`
 
+(Upon starting the server, the database is automatically seeeded with some fake data)
+
 Steps to run rontend:
 
 - `cd frotend`

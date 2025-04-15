@@ -5,12 +5,12 @@ const Navbar = () => {
 
   const isActive = (path: string) => {
     return location.pathname === path
-      ? "font-bold border-b-2 border-blue-500"
+      ? "font-bold border-b-2 border-[#00A1F0]"
       : "";
   };
 
   return (
-    <nav className="bg-gray-800 text-white p-4">
+    <nav className="bg-black text-white p-4">
       <div className="container mx-auto flex justify-between items-center">
         <div className="text-xl font-bold flex items-center">
           <img src="/sponsorcx.png" alt="SponsorCX Logo" className="h-8 mr-2" />

@@ -30,11 +30,6 @@ app.use((req, res, next) => {
   next();
 });
 
-// Root route
-app.get("/", (req, res) => {
-  res.json({ message: "Welcome to the server! 🎉" });
-});
-
 // API routes
 app.use("/api/organizations", organizationRoutes);
 app.use("/api/deals", dealRoutes);

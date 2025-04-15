@@ -71,7 +71,6 @@ const Deals = () => {
           statusFilter,
           yearFilter
         );
-        console.log(dealsData);
 
         setDeals(dealsData);
         setError(null);

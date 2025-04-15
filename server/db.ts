@@ -44,14 +44,12 @@ function initializeDatabase() {
   `
   ).run();
 
-  // Seed data
   seedDatabase(db);
 
   return db;
 }
 
 function seedDatabase(db: Database.Database) {
-  // Clear existing data
   db.prepare("DELETE FROM deals").run();
   db.prepare("DELETE FROM accounts").run();
   db.prepare("DELETE FROM organizations").run();
@@ -61,7 +59,6 @@ function seedDatabase(db: Database.Database) {
     "DELETE FROM sqlite_sequence WHERE name IN ('organizations', 'accounts', 'deals')"
   ).run();
 
-  // Insert organizations
   const organizations = [
     { name: "Acme Corporation" },
     { name: "Globex Industries" },
@@ -75,7 +72,6 @@ function seedDatabase(db: Database.Database) {
     insertOrg.run(org.name);
   });
 
-  // Insert accounts with relationship to organizations
   const accounts = [
     { name: "Acme Sales", organization_id: 1 },
     { name: "Acme Marketing", organization_id: 1 },
@@ -95,16 +91,6 @@ function seedDatabase(db: Database.Database) {
   accounts.forEach((account) => {
     insertAccount.run(account.name, account.organization_id);
   });
-
-  // Insert deals with relationships to accounts and organizations
-  const dealStatuses = [
-    "prospecting",
-    "qualified",
-    "proposal",
-    "negotiation",
-    "closed-won",
-    "closed-lost",
-  ];
 
   const deals = [
     {
@@ -195,11 +181,529 @@ function seedDatabase(db: Database.Database) {
       value: 300000,
       status: "prospecting",
     },
+    // Additional deals for Acme Corporation (org_id: 1)
+    {
+      account_id: 1,
+      organization_id: 1,
+      start_date: "2023-02-10",
+      end_date: "2023-08-10",
+      value: 45000,
+      status: "closed-won",
+    },
+    {
+      account_id: 2,
+      organization_id: 1,
+      start_date: "2023-04-01",
+      end_date: "2023-10-01",
+      value: 28500,
+      status: "closed-won",
+    },
+    {
+      account_id: 1,
+      organization_id: 1,
+      start_date: "2023-07-15",
+      end_date: "2024-01-15",
+      value: 62000,
+      status: "negotiation",
+    },
+    {
+      account_id: 2,
+      organization_id: 1,
+      start_date: "2023-05-20",
+      end_date: "2024-05-19",
+      value: 95000,
+      status: "proposal",
+    },
+    {
+      account_id: 1,
+      organization_id: 1,
+      start_date: "2023-08-01",
+      end_date: "2024-07-31",
+      value: 110000,
+      status: "qualified",
+    },
+    {
+      account_id: 2,
+      organization_id: 1,
+      start_date: "2023-09-10",
+      end_date: "2024-03-10",
+      value: 42000,
+      status: "prospecting",
+    },
+    {
+      account_id: 1,
+      organization_id: 1,
+      start_date: "2023-10-15",
+      end_date: "2024-04-15",
+      value: 67500,
+      status: "negotiation",
+    },
+    {
+      account_id: 2,
+      organization_id: 1,
+      start_date: "2023-11-01",
+      end_date: "2024-11-01",
+      value: 82000,
+      status: "proposal",
+    },
+    {
+      account_id: 1,
+      organization_id: 1,
+      start_date: "2023-12-01",
+      end_date: "2024-06-01",
+      value: 55000,
+      status: "qualified",
+    },
+    {
+      account_id: 2,
+      organization_id: 1,
+      start_date: "2024-01-10",
+      end_date: "2024-07-10",
+      value: 38000,
+      status: "prospecting",
+    },
+    {
+      account_id: 1,
+      organization_id: 1,
+      start_date: "2023-03-05",
+      end_date: "2023-09-05",
+      value: 29500,
+      status: "closed-won",
+    },
+    {
+      account_id: 2,
+      organization_id: 1,
+      start_date: "2023-02-20",
+      end_date: "2023-08-20",
+      value: 33500,
+      status: "closed-lost",
+    },
+    // Additional deals for Globex Industries (org_id: 2)
+    {
+      account_id: 3,
+      organization_id: 2,
+      start_date: "2023-02-01",
+      end_date: "2023-12-01",
+      value: 85000,
+      status: "closed-won",
+    },
+    {
+      account_id: 4,
+      organization_id: 2,
+      start_date: "2023-03-15",
+      end_date: "2024-03-14",
+      value: 120000,
+      status: "negotiation",
+    },
+    {
+      account_id: 3,
+      organization_id: 2,
+      start_date: "2023-04-10",
+      end_date: "2023-10-10",
+      value: 65000,
+      status: "closed-won",
+    },
+    {
+      account_id: 4,
+      organization_id: 2,
+      start_date: "2023-05-01",
+      end_date: "2024-04-30",
+      value: 180000,
+      status: "proposal",
+    },
+    {
+      account_id: 3,
+      organization_id: 2,
+      start_date: "2023-06-15",
+      end_date: "2024-06-14",
+      value: 95000,
+      status: "qualified",
+    },
+    {
+      account_id: 4,
+      organization_id: 2,
+      start_date: "2023-08-01",
+      end_date: "2024-07-31",
+      value: 210000,
+      status: "negotiation",
+    },
+    {
+      account_id: 3,
+      organization_id: 2,
+      start_date: "2023-09-15",
+      end_date: "2024-03-15",
+      value: 75000,
+      status: "proposal",
+    },
+    {
+      account_id: 4,
+      organization_id: 2,
+      start_date: "2023-10-01",
+      end_date: "2024-09-30",
+      value: 195000,
+      status: "qualified",
+    },
+    {
+      account_id: 3,
+      organization_id: 2,
+      start_date: "2023-11-15",
+      end_date: "2024-05-15",
+      value: 110000,
+      status: "prospecting",
+    },
+    {
+      account_id: 4,
+      organization_id: 2,
+      start_date: "2023-12-01",
+      end_date: "2024-11-30",
+      value: 225000,
+      status: "negotiation",
+    },
+    {
+      account_id: 3,
+      organization_id: 2,
+      start_date: "2024-01-15",
+      end_date: "2024-07-15",
+      value: 90000,
+      status: "proposal",
+    },
+    {
+      account_id: 4,
+      organization_id: 2,
+      start_date: "2023-02-20",
+      end_date: "2023-08-20",
+      value: 115000,
+      status: "closed-won",
+    },
+    {
+      account_id: 3,
+      organization_id: 2,
+      start_date: "2023-03-05",
+      end_date: "2023-09-05",
+      value: 70000,
+      status: "closed-lost",
+    },
+    // Additional deals for Stark Enterprises (org_id: 3)
+    {
+      account_id: 5,
+      organization_id: 3,
+      start_date: "2023-01-10",
+      end_date: "2023-07-10",
+      value: 320000,
+      status: "closed-won",
+    },
+    {
+      account_id: 6,
+      organization_id: 3,
+      start_date: "2023-03-01",
+      end_date: "2024-02-28",
+      value: 580000,
+      status: "negotiation",
+    },
+    {
+      account_id: 5,
+      organization_id: 3,
+      start_date: "2023-04-15",
+      end_date: "2023-10-15",
+      value: 420000,
+      status: "closed-won",
+    },
+    {
+      account_id: 6,
+      organization_id: 3,
+      start_date: "2023-05-01",
+      end_date: "2024-04-30",
+      value: 680000,
+      status: "proposal",
+    },
+    {
+      account_id: 5,
+      organization_id: 3,
+      start_date: "2023-06-15",
+      end_date: "2024-06-14",
+      value: 550000,
+      status: "qualified",
+    },
+    {
+      account_id: 6,
+      organization_id: 3,
+      start_date: "2023-07-10",
+      end_date: "2024-07-09",
+      value: 720000,
+      status: "negotiation",
+    },
+    {
+      account_id: 5,
+      organization_id: 3,
+      start_date: "2023-08-15",
+      end_date: "2024-02-15",
+      value: 480000,
+      status: "proposal",
+    },
+    {
+      account_id: 6,
+      organization_id: 3,
+      start_date: "2023-10-01",
+      end_date: "2024-09-30",
+      value: 650000,
+      status: "qualified",
+    },
+    {
+      account_id: 5,
+      organization_id: 3,
+      start_date: "2023-11-15",
+      end_date: "2024-05-15",
+      value: 510000,
+      status: "prospecting",
+    },
+    {
+      account_id: 6,
+      organization_id: 3,
+      start_date: "2023-12-01",
+      end_date: "2024-11-30",
+      value: 780000,
+      status: "negotiation",
+    },
+    {
+      account_id: 5,
+      organization_id: 3,
+      start_date: "2024-01-15",
+      end_date: "2024-07-15",
+      value: 440000,
+      status: "proposal",
+    },
+    {
+      account_id: 6,
+      organization_id: 3,
+      start_date: "2023-02-10",
+      end_date: "2023-08-10",
+      value: 380000,
+      status: "closed-won",
+    },
+    {
+      account_id: 5,
+      organization_id: 3,
+      start_date: "2023-03-20",
+      end_date: "2023-09-20",
+      value: 450000,
+      status: "closed-lost",
+    },
+    // Additional deals for Wayne Industries (org_id: 4)
+    {
+      account_id: 7,
+      organization_id: 4,
+      start_date: "2023-01-15",
+      end_date: "2023-07-15",
+      value: 110000,
+      status: "closed-won",
+    },
+    {
+      account_id: 8,
+      organization_id: 4,
+      start_date: "2023-02-01",
+      end_date: "2024-01-31",
+      value: 185000,
+      status: "negotiation",
+    },
+    {
+      account_id: 7,
+      organization_id: 4,
+      start_date: "2023-04-10",
+      end_date: "2023-10-10",
+      value: 135000,
+      status: "closed-won",
+    },
+    {
+      account_id: 8,
+      organization_id: 4,
+      start_date: "2023-06-01",
+      end_date: "2024-05-31",
+      value: 220000,
+      status: "proposal",
+    },
+    {
+      account_id: 7,
+      organization_id: 4,
+      start_date: "2023-07-15",
+      end_date: "2024-07-14",
+      value: 150000,
+      status: "qualified",
+    },
+    {
+      account_id: 8,
+      organization_id: 4,
+      start_date: "2023-08-01",
+      end_date: "2024-07-31",
+      value: 240000,
+      status: "negotiation",
+    },
+    {
+      account_id: 7,
+      organization_id: 4,
+      start_date: "2023-09-15",
+      end_date: "2024-03-15",
+      value: 170000,
+      status: "proposal",
+    },
+    {
+      account_id: 8,
+      organization_id: 4,
+      start_date: "2023-10-01",
+      end_date: "2024-09-30",
+      value: 225000,
+      status: "qualified",
+    },
+    {
+      account_id: 7,
+      organization_id: 4,
+      start_date: "2023-11-15",
+      end_date: "2024-05-15",
+      value: 145000,
+      status: "prospecting",
+    },
+    {
+      account_id: 8,
+      organization_id: 4,
+      start_date: "2023-12-01",
+      end_date: "2024-11-30",
+      value: 210000,
+      status: "negotiation",
+    },
+    {
+      account_id: 7,
+      organization_id: 4,
+      start_date: "2024-01-15",
+      end_date: "2024-07-15",
+      value: 160000,
+      status: "proposal",
+    },
+    {
+      account_id: 8,
+      organization_id: 4,
+      start_date: "2023-02-10",
+      end_date: "2023-08-10",
+      value: 175000,
+      status: "closed-won",
+    },
+    {
+      account_id: 7,
+      organization_id: 4,
+      start_date: "2023-03-20",
+      end_date: "2023-09-20",
+      value: 130000,
+      status: "closed-lost",
+    },
+    // Additional deals for Umbrella Corporation (org_id: 5)
+    {
+      account_id: 9,
+      organization_id: 5,
+      start_date: "2023-01-10",
+      end_date: "2023-07-10",
+      value: 140000,
+      status: "closed-won",
+    },
+    {
+      account_id: 10,
+      organization_id: 5,
+      start_date: "2023-02-15",
+      end_date: "2024-02-14",
+      value: 280000,
+      status: "negotiation",
+    },
+    {
+      account_id: 9,
+      organization_id: 5,
+      start_date: "2023-03-10",
+      end_date: "2023-09-10",
+      value: 165000,
+      status: "closed-won",
+    },
+    {
+      account_id: 10,
+      organization_id: 5,
+      start_date: "2023-05-01",
+      end_date: "2024-04-30",
+      value: 320000,
+      status: "proposal",
+    },
+    {
+      account_id: 9,
+      organization_id: 5,
+      start_date: "2023-06-15",
+      end_date: "2024-06-14",
+      value: 190000,
+      status: "qualified",
+    },
+    {
+      account_id: 10,
+      organization_id: 5,
+      start_date: "2023-07-01",
+      end_date: "2024-06-30",
+      value: 340000,
+      status: "negotiation",
+    },
+    {
+      account_id: 9,
+      organization_id: 5,
+      start_date: "2023-09-15",
+      end_date: "2024-03-15",
+      value: 175000,
+      status: "proposal",
+    },
+    {
+      account_id: 10,
+      organization_id: 5,
+      start_date: "2023-10-01",
+      end_date: "2024-09-30",
+      value: 325000,
+      status: "qualified",
+    },
+    {
+      account_id: 9,
+      organization_id: 5,
+      start_date: "2023-11-15",
+      end_date: "2024-05-15",
+      value: 185000,
+      status: "prospecting",
+    },
+    {
+      account_id: 10,
+      organization_id: 5,
+      start_date: "2023-12-01",
+      end_date: "2024-11-30",
+      value: 310000,
+      status: "negotiation",
+    },
+    {
+      account_id: 9,
+      organization_id: 5,
+      start_date: "2024-01-15",
+      end_date: "2024-07-15",
+      value: 160000,
+      status: "proposal",
+    },
+    {
+      account_id: 10,
+      organization_id: 5,
+      start_date: "2023-02-20",
+      end_date: "2023-08-20",
+      value: 270000,
+      status: "closed-won",
+    },
+    {
+      account_id: 9,
+      organization_id: 5,
+      start_date: "2023-03-05",
+      end_date: "2023-09-05",
+      value: 145000,
+      status: "closed-lost",
+    },
   ];
 
   const insertDeal = db.prepare(
     "INSERT INTO deals (account_id, organization_id, start_date, end_date, value, status) VALUES (?, ?, ?, ?, ?, ?)"
   );
+
   deals.forEach((deal) => {
     insertDeal.run(
       deal.account_id,
